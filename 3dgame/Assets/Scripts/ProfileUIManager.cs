@@ -4,6 +4,7 @@ using UnityEngine.Networking;
 using TMPro;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 public class ProfileUIManager : MonoBehaviour
 {
@@ -13,11 +14,43 @@ public class ProfileUIManager : MonoBehaviour
     public GameObject profileDataUI;
     public GameObject logoutButton;
 
+    private List<NFTData> nftList = new List<NFTData>();
+
     [System.Serializable]
     public class UserData
     {
         public string name;
-        // Other fields that your JSON might contain
+        public List<NFTData> nfts;
+    }
+
+    [System.Serializable]
+    public class NFTData
+    {
+        public string id;
+        public string name;
+        public string imageUrl;
+        // Add other NFT attributes here
+    }
+
+    [Serializable]
+    private class DataCollection
+    {
+        public AssetCollection assets;
+    }
+
+    [Serializable]
+    private class AssetCollection
+    {
+        public AssetData[] data;
+    }
+
+    [Serializable]
+    private class AssetData
+    {
+        public string id;
+        public string name;
+        public string imageUrl;
+        // Include other asset fields as necessary
     }
 
     private void Start()
@@ -36,7 +69,7 @@ public class ProfileUIManager : MonoBehaviour
 
     private IEnumerator LoginRoutine(string email)
     {
-        string url = "http://localhost:3000/v2/users/" + email;
+        string url = AppConfig.SERVER_ENDPOINT + "/v2/users/" + email;
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
         {
@@ -58,12 +91,27 @@ public class ProfileUIManager : MonoBehaviour
     private void ProcessResponse(string json)
     {
         Debug.Log("process " + json);
-        // Parse the JSON response
-        // You need to define a class that matches the structure of your JSON data
-        // For example:
-        // UserData userData = JsonUtility.FromJson<UserData>(json);
-        // Update the UI elements based on userData
-        // profileNameText.text = userData.name; // Example
+        try
+        {
+            // Assuming 'json' is the JSON string you received from the web request
+            var dataCollection = JsonUtility.FromJson<DataCollection>(json);
+            foreach (var item in dataCollection.assets.data)
+            {
+                NFTData nft = new NFTData
+                {
+                    id = item.id,
+                    name = item.name,
+                    imageUrl = item.imageUrl
+                    // Set other fields as necessary
+                };
+                nftList.Add(nft);
+            }
+            UpdateUI(); // Make sure this method knows how to handle and display NFT data
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Failed to parse JSON response: " + e.Message);
+        }
     }
 
 
