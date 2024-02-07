@@ -1,14 +1,15 @@
-const express = require('express');
-const axios = require('axios');
-const app = express();
-
-const port = process.env.PORT || 3001;
-
+var express = require('express');
+var router = express.Router();
+var axios = require('axios');
 require('dotenv').config();
 
 const apiKey = process.env.GAMESHIFT_KEY;
 
-app.get('/v2/users/:email', async (req, res) => {
+router.get('/', function (req, res, next) {
+  res.send('respond with a resource');
+});
+
+router.get('/:email', async (req, res) => {
   const email = req.params.email;
   const refId = email.split('@')[0];
 
@@ -45,9 +46,7 @@ app.get('/v2/users/:email', async (req, res) => {
       const profileTemplate = '8bd9e0c7-eab5-4631-828a-639dbfd44167';
 
       response = await axios.post(
-        'https://api.gameshift.dev/asset-templates/' +
-          profileTemplate +
-          '/assets',
+        `https://api.gameshift.dev/asset-templates/${profileTemplate}/assets`,
         {
           destinationUserReferenceId: refId,
         },
@@ -83,6 +82,4 @@ app.get('/v2/users/:email', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+module.exports = router;
