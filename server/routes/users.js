@@ -4,6 +4,7 @@ var axios = require('axios');
 require('dotenv').config();
 
 const apiKey = process.env.GAMESHIFT_KEY;
+const profileTemplate = process.env.PROFILE_TEMPLATE;
 
 router.get('/', function (req, res, next) {
   res.status(200).send('respond with a resource');
@@ -42,8 +43,6 @@ router.get('/:email', async (req, res) => {
           },
         },
       );
-
-      const profileTemplate = '8bd9e0c7-eab5-4631-828a-639dbfd44167';
 
       response = await axios.post(
         `https://api.gameshift.dev/asset-templates/${profileTemplate}/assets`,
