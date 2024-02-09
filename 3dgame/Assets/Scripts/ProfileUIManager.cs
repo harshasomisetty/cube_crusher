@@ -5,12 +5,15 @@ using TMPro;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using Unity.Properties;
 
 public class ProfileUIManager : MonoBehaviour
 {
     public TMP_InputField emailInputField;
     public GameObject loginUI;
     public TextMeshProUGUI profileNameText;
+    public TextMeshProUGUI gamesPlayed;
     public GameObject profileDataUI;
     public GameObject logoutButton;
 
@@ -50,8 +53,17 @@ public class ProfileUIManager : MonoBehaviour
         public string id;
         public string name;
         public string imageUrl;
-        // Include other asset fields as necessary
+        public string environment;
+        public Attributes[] attributes;
     }
+
+    [Serializable]
+    private class Attributes
+    {
+        public string value;
+        public string traitType;
+    }
+
 
     private void Start()
     {
@@ -67,9 +79,43 @@ public class ProfileUIManager : MonoBehaviour
         }
     }
 
+    private void PrintObject(object obj, int indentLevel = 0)
+    {
+        if (obj == null)
+        {
+            Debug.Log(new String(' ', indentLevel * 2) + "null");
+            return;
+        }
+
+        string indent = new String(' ', indentLevel * 2);
+        Type objType = obj.GetType();
+        if (objType.IsPrimitive || objType == typeof(string))
+        {
+            Debug.Log(indent + obj);
+        }
+        else if (objType.IsArray)
+        {
+            IEnumerable enumerable = obj as IEnumerable;
+            foreach (object child in enumerable)
+            {
+                PrintObject(child, indentLevel + 1);
+            }
+        }
+        else
+        {
+            foreach (FieldInfo field in objType.GetFields(BindingFlags.Public | BindingFlags.Instance))
+            {
+                object value = field.GetValue(obj);
+                Debug.Log(indent + field.Name + ": ");
+                PrintObject(value, indentLevel + 1);
+            }
+        }
+    }
+
+
     private IEnumerator LoginRoutine(string email)
     {
-        string url = AppConfig.SERVER_ENDPOINT + "/v2/users/" + email;
+        string url = AppConfig.SERVER_ENDPOINT + "/users/" + email;
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
         {
@@ -95,8 +141,18 @@ public class ProfileUIManager : MonoBehaviour
         {
             // Assuming 'json' is the JSON string you received from the web request
             var dataCollection = JsonUtility.FromJson<DataCollection>(json);
+            Debug.Log("all " + JsonUtility.ToJson(dataCollection, true));
+            Debug.Log("single " + JsonUtility.ToJson(dataCollection.assets.data[0], true));
+
             foreach (var item in dataCollection.assets.data)
             {
+                if (item.name == "Profile NFT")
+                {
+                    Debug.Log("found " + Array.Find(item.attributes, x => x.traitType == "Games Played").value);
+
+                    PlayerPrefs.SetString("GamesPlayed", Array.Find(item.attributes, x => x.traitType == "Games Played").value);
+                }
+
                 NFTData nft = new NFTData
                 {
                     id = item.id,
@@ -126,13 +182,15 @@ public class ProfileUIManager : MonoBehaviour
     private void UpdateUI()
     {
         string userEmail = PlayerPrefs.GetString("UserEmail", "");
+        string gamesPlayedString = PlayerPrefs.GetString("GamesPlayed", "");
 
         if (!string.IsNullOrEmpty(userEmail))
         {
             loginUI.SetActive(false);
             profileDataUI.SetActive(true);
             logoutButton.SetActive(true);
-            profileNameText.text = userEmail;
+            profileNameText.text = "Email: " + userEmail;
+            gamesPlayed.text = "Games Played: " + gamesPlayedString;
         }
         else
         {
