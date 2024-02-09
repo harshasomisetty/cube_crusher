@@ -38,9 +38,13 @@ public class PlayerMovement : MonoBehaviour
 
         rb.velocity = new Vector3(horizontalInput * movementSpeed, rb.velocity.y, verticalInput * movementSpeed);
 
-        if ((Mathf.Abs(horizontalInput) > 0 || Mathf.Abs(verticalInput) > 0) && !moveSound.isPlaying)
+        if (moveSound != null)
         {
-            moveSound.Play();
+            if ((Mathf.Abs(horizontalInput) > 0 || Mathf.Abs(verticalInput) > 0) && !moveSound.isPlaying)
+            {
+                moveSound.Play();
+            }
+
         }
 
         if (Input.GetButtonDown("Jump") && isGrounded())
