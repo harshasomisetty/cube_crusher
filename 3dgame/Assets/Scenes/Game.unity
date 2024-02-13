@@ -1101,6 +1101,7 @@ GameObject:
   - component: {fileID: 1670712856}
   - component: {fileID: 1670712855}
   - component: {fileID: 1670712854}
+  - component: {fileID: 1670712857}
   m_Layer: 6
   m_Name: Coin
   m_TagString: Coin
@@ -1196,6 +1197,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1670712851}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1670712857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1670712851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d44638e154d11402d9f52bd42ba668b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1810570958
 GameObject:
   m_ObjectHideFlags: 0
