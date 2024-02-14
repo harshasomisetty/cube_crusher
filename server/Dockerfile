@@ -8,6 +8,9 @@ RUN npm install
 
 COPY . .
 
+RUN npm install typescript -g
+RUN tsc
+
 EXPOSE 3000
 
-CMD [ "node", "./bin/www" ]
+CMD [ "node", "./dist/bin/www.js" ]
