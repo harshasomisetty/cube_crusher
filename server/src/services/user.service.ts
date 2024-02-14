@@ -60,7 +60,7 @@ export const checkUserExists = async (refId, email) => {
 export const getUserProfileNFT = async (refId) => {
   const assetsResponse = await getUserAssets(refId);
   const profileNFT = assetsResponse.data.data.find(
-    (nft) => nft.name === 'Profile NFT',
+    (nft) => nft.name === 'Profile',
   );
 
   if (!profileNFT) {
