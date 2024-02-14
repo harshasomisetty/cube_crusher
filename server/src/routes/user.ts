@@ -59,6 +59,7 @@ router.get('/:email/profile/gamesPlayed', async (req, res) => {
   const refId = email.split('@')[0];
 
   try {
+    await checkUserExists(refId, email);
     const profileNFT = await getUserProfileNFT(refId);
     res.json({
       email: email,
