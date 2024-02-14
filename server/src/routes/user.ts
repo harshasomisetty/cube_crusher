@@ -2,15 +2,12 @@ var express = require('express');
 var router = express.Router();
 require('dotenv').config();
 import {
-  createUser,
+  awardToUser,
+  checkUserExists,
   getUserAssets,
-  getUserByRefId,
   getUserProfileNFT,
-  postAssetTemplate,
   updateAsset,
 } from '../services/user.service';
-
-const profileTemplate = process.env.PROFILE_TEMPLATE;
 
 router.get('/', function (req, res, next) {
   res.status(200).send('user endpoint');
@@ -22,12 +19,7 @@ router.get('/:email', async (req, res) => {
   const refId = email.split('@')[0];
 
   try {
-    let response = await getUserByRefId(refId);
-
-    if (response.status === 404) {
-      await createUser(refId, email);
-      await postAssetTemplate(refId, profileTemplate);
-    }
+    await checkUserExists(refId, email);
 
     const assetsResponse = await getUserAssets(refId);
 
@@ -43,11 +35,12 @@ router.get('/:email', async (req, res) => {
 
 // get user profile NFT
 router.get('/:email/profile', async (req, res) => {
-  console.log('get user profile NFT');
   const email = req.params.email;
   const refId = email.split('@')[0];
 
   try {
+    await checkUserExists(refId, email);
+
     const profileNFT = await getUserProfileNFT(refId);
     res.json({
       profileNFT,
@@ -62,7 +55,6 @@ router.get('/:email/profile', async (req, res) => {
 });
 
 router.get('/:email/profile/gamesPlayed', async (req, res) => {
-  console.log('get user profile NFT');
   const email = req.params.email;
   const refId = email.split('@')[0];
 
@@ -94,6 +86,7 @@ router.put('/:email/finishGame', async (req, res) => {
     const gamesPlayedAttribute = profileNFT.attributes.find(
       (attr) => attr.traitType === 'Games Played',
     );
+
     if (!gamesPlayedAttribute) {
       return res
         .status(400)
@@ -114,6 +107,21 @@ router.put('/:email/finishGame', async (req, res) => {
     res
       .status(error.message === 'Profile NFT not found' ? 404 : 500)
       .send({ message: error.message });
+  }
+});
+
+router.post('/:email/award', async (req, res) => {
+  const email = req.params.email;
+  const refId = email.split('@')[0];
+
+  try {
+    const result = await awardToUser(refId);
+    res.json({
+      ...result,
+    });
+  } catch (error) {
+    console.error('Error in /award route:', error.message);
+    res.status(error.response?.status || 500).send({ message: error.message });
   }
 });
 

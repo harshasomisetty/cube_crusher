@@ -1,7 +1,10 @@
+import { coinDetails, starDetails } from '../bin/nftJson';
+
 const axios = require('axios');
 
 const apiKey = process.env.GAMESHIFT_KEY;
 const apiRoot = process.env.GAMESHIFT_ROOT;
+const profileTemplate = process.env.PROFILE_TEMPLATE;
 
 const headers = {
   accept: 'application/json',
@@ -9,18 +12,18 @@ const headers = {
   'x-api-key': apiKey,
 };
 
-const validateStatus = function (status) {
+export const validateStatus = function (status) {
   return (status >= 200 && status < 300) || status === 404;
 };
 
-const getUserByRefId = async (refId) => {
+export const getUserByRefId = async (refId) => {
   return await axios.get(`${apiRoot}/v2/users/${refId}`, {
     headers,
     validateStatus,
   });
 };
 
-const createUser = async (refId, email) => {
+export const createUser = async (refId, email) => {
   return await axios.post(
     `${apiRoot}/v2/users`,
     { referenceId: refId, email },
@@ -28,7 +31,7 @@ const createUser = async (refId, email) => {
   );
 };
 
-const postAssetTemplate = async (refId, profileTemplate) => {
+export const postAssetTemplate = async (refId, profileTemplate) => {
   return await axios.post(
     `${apiRoot}/asset-templates/${profileTemplate}/assets`,
     { destinationUserReferenceId: refId },
@@ -36,7 +39,7 @@ const postAssetTemplate = async (refId, profileTemplate) => {
   );
 };
 
-const getUserAssets = async (refId) => {
+export const getUserAssets = async (refId) => {
   return await axios.get(`${apiRoot}/users/${refId}/assets`, {
     headers: {
       accept: 'application/json',
@@ -45,7 +48,16 @@ const getUserAssets = async (refId) => {
   });
 };
 
-const getUserProfileNFT = async (refId) => {
+export const checkUserExists = async (refId, email) => {
+  let response = await getUserByRefId(refId);
+
+  if (response.status === 404) {
+    await createUser(refId, email);
+    await postAssetTemplate(refId, profileTemplate);
+  }
+};
+
+export const getUserProfileNFT = async (refId) => {
   const assetsResponse = await getUserAssets(refId);
   const profileNFT = assetsResponse.data.data.find(
     (nft) => nft.name === 'Profile NFT',
@@ -58,7 +70,7 @@ const getUserProfileNFT = async (refId) => {
   return profileNFT;
 };
 
-const updateAsset = async (assetId, imageUrl, attributes) => {
+export const updateAsset = async (assetId, imageUrl, attributes) => {
   return await axios.put(
     `${apiRoot}/assets/${assetId}`,
     { imageUrl, attributes },
@@ -66,11 +78,28 @@ const updateAsset = async (assetId, imageUrl, attributes) => {
   );
 };
 
-export {
-  createUser,
-  getUserAssets,
-  getUserByRefId,
-  getUserProfileNFT,
-  postAssetTemplate,
-  updateAsset,
+export const awardToUser = async (refId) => {
+  const isStarAward = Math.random() < 0.5;
+
+  const details = isStarAward ? starDetails : coinDetails;
+
+  try {
+    const response = await axios.post(
+      `${apiRoot}/assets`,
+      {
+        details,
+        destinationUserReferenceId: refId,
+      },
+      { headers },
+    );
+
+    return {
+      name: response.data.name,
+      description: response.data.description,
+      imageUrl: response.data.imageUrl,
+    };
+  } catch (error) {
+    console.error('Error posting award to Gameshift:', error.message);
+    throw error;
+  }
 };
