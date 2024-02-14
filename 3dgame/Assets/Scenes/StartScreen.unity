@@ -245,7 +245,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 342209272}
-  - component: {fileID: 342209271}
+  - component: {fileID: 342209273}
   m_Layer: 0
   m_Name: MenuManager
   m_TagString: Untagged
@@ -253,19 +253,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &342209271
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 342209270}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 94dce24f37f864a3881a612b7c282c4e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  loginButtonText: {fileID: 1367009503}
 --- !u!4 &342209272
 Transform:
   m_ObjectHideFlags: 0
@@ -281,6 +268,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &342209273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 342209270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94dce24f37f864a3881a612b7c282c4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  loginButtonText: {fileID: 1367009503}
 --- !u!1 &405622587
 GameObject:
   m_ObjectHideFlags: 0
@@ -364,7 +364,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 342209271}
+      - m_Target: {fileID: 342209273}
         m_TargetAssemblyTypeName: StartMenu, Assembly-CSharp
         m_MethodName: LoginOrLogout
         m_Mode: 1
@@ -634,7 +634,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 342209271}
+      - m_Target: {fileID: 342209273}
         m_TargetAssemblyTypeName: StartMenu, Assembly-CSharp
         m_MethodName: StartGame
         m_Mode: 1

@@ -80,10 +80,7 @@ public class EndMenu : MonoBehaviour
 
     public void OnAwardUserSuccess(string json)
     {
-
-        Debug.Log("AwardJson: " + json);
         var awardData = JsonUtility.FromJson<AwardJson>(json);
-        Debug.Log("AwardJson image: " + awardData.imageUrl);
         if (awardImage == null)
         {
             Debug.LogError("awardImage is not assigned in the inspector.");

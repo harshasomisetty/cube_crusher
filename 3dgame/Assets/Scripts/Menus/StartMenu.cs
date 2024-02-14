@@ -17,6 +17,13 @@ public class StartMenu : MonoBehaviour
     private void Start()
     {
         userDataManager = new UserDataManager();
+
+        if (userDataManager == null || loginButtonText == null)
+        {
+            Debug.LogError("UserDataManager component not found on the GameObject.");
+            return;
+        }
+
         UpdateLoginButtonText();
     }
 
@@ -34,6 +41,12 @@ public class StartMenu : MonoBehaviour
 
     public void UpdateLoginButtonText()
     {
+        if (userDataManager == null || loginButtonText == null)
+        {
+            Debug.LogError("UserDataManager component not found on the GameObject.");
+            return;
+        }
+
         loginButtonText.text = userDataManager.IsLoggedIn() ? "Profile" : "Login";
     }
 

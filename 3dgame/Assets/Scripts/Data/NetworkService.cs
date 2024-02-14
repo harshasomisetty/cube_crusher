@@ -10,7 +10,6 @@ namespace Data
     {
         public IEnumerator LoginRoutine(string email, Action<string> onSuccess, Action<string> onError)
         {
-            Debug.Log("in login routine");
             string url = AppConfig.SERVER_ENDPOINT + "/user/" + email + "/profile/gamesPlayed";
 
             using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
@@ -72,44 +71,26 @@ namespace Data
 
         public IEnumerator DownloadImage(string imageUrl, Image targetImage)
         {
-            if (targetImage == null)
+            if (targetImage == null || !targetImage.gameObject.activeInHierarchy)
             {
-                Debug.LogError("Image component is null.");
+                Debug.LogError("Image component is null, or not active in hierarchy.");
                 yield break;
             }
 
-            if (!targetImage.gameObject.activeInHierarchy)
-            {
-                Debug.LogError("Image component's GameObject is not active in the hierarchy.");
-                yield break;
-            }
-
-            UnityWebRequest imageRequest = UnityWebRequestTexture.GetTexture(imageUrl);
+            string proxyUrl = AppConfig.SERVER_ENDPOINT + "/proxy-image?url=" + Uri.EscapeDataString(imageUrl);
+            UnityWebRequest imageRequest = UnityWebRequestTexture.GetTexture(proxyUrl);
             yield return imageRequest.SendWebRequest();
 
-            if (imageRequest.result != UnityWebRequest.Result.Success)
+            if (imageRequest.result == UnityWebRequest.Result.Success)
             {
-                Debug.LogError("Failed to download image: " + imageRequest.error);
+                Texture2D texture = DownloadHandlerTexture.GetContent(imageRequest);
+                Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                targetImage.sprite = sprite;
+                targetImage.preserveAspect = true;
             }
             else
             {
-                Texture2D texture = DownloadHandlerTexture.GetContent(imageRequest);
-                if (texture == null)
-                {
-                    Debug.LogError("Downloaded texture is null.");
-                    yield break;
-                }
-
-                if (targetImage != null && targetImage.gameObject.activeInHierarchy)
-                {
-                    Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-                    targetImage.sprite = sprite;
-                    targetImage.preserveAspect = true;
-                }
-                else
-                {
-                    Debug.LogError("Image component or its GameObject became inactive after download.");
-                }
+                Debug.LogError("Failed to download image via proxy: " + imageRequest.error);
             }
         }
 
