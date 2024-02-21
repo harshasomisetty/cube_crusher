@@ -1,10 +1,13 @@
 var express = require('express');
 var router = express.Router();
+
 require('dotenv').config();
+
 import {
   awardToUser,
   checkUserExists,
   getUserAssets,
+  getUserCharacters,
   getUserProfileNFT,
   updateAsset,
 } from '../services/user.service';
@@ -54,7 +57,7 @@ router.get('/:email/profile', async (req, res) => {
   }
 });
 
-router.get('/:email/profile/gamesPlayed', async (req, res) => {
+router.get('/:email/gamesPlayed', async (req, res) => {
   const email = req.params.email;
   const refId = email.split('@')[0];
 
@@ -73,6 +76,24 @@ router.get('/:email/profile/gamesPlayed', async (req, res) => {
     res.status(statusCode).send({
       message: error.message || 'An error occurred while fetching the profile',
     });
+  }
+});
+
+router.get('/:email/characters', async (req, res) => {
+  const email = req.params.email;
+  const refId = email.split('@')[0];
+
+  try {
+    await checkUserExists(refId, email);
+
+    let characters = await getUserCharacters(refId);
+    res.json({
+      characters,
+    });
+  } catch (error) {
+    res
+      .status(error.response ? error.response.status : 500)
+      .send(error.response ? error.response.data : 'An error occurred');
   }
 });
 

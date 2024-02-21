@@ -10,7 +10,7 @@ namespace Data
     {
         public IEnumerator LoginRoutine(string email, Action<string> onSuccess, Action<string> onError)
         {
-            string url = AppConfig.SERVER_ENDPOINT + "/user/" + email + "/profile/gamesPlayed";
+            string url = AppConfig.SERVER_ENDPOINT + "/user/" + email + "/gamesPlayed";
 
             using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
             {
@@ -95,7 +95,24 @@ namespace Data
         }
 
 
+        public IEnumerator GetUserCharacters(string email, Action<string> onSuccess, Action<string> onError)
+        {
+            string url = AppConfig.SERVER_ENDPOINT + "/user/" + email + "/characters";
 
+            using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
+            {
+                yield return webRequest.SendWebRequest();
+                Debug.Log("webRequest.downloadHandler.text" + webRequest.downloadHandler.text);
 
+                if (webRequest.result == UnityWebRequest.Result.ConnectionError || webRequest.result == UnityWebRequest.Result.ProtocolError)
+                {
+                    onError?.Invoke(webRequest.error);
+                }
+                else
+                {
+                    onSuccess?.Invoke(webRequest.downloadHandler.text);
+                }
+            }
+        }
     }
 }

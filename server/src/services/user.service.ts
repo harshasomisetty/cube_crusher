@@ -48,6 +48,16 @@ export const getUserAssets = async (refId) => {
   });
 };
 
+export const getUserCharacters = async (refId) => {
+  let assetsResponse = await getUserAssets(refId);
+
+  const colors = assetsResponse.data.data
+    .filter((asset) => asset.name.endsWith('character'))
+    .map((asset) => asset.name.split(' character')[0]);
+
+  return colors;
+};
+
 export const checkUserExists = async (refId, email) => {
   let response = await getUserByRefId(refId);
 

@@ -28,7 +28,6 @@ public class ProfileUIManager : MonoBehaviour
 
     private void Start()
     {
-        // Debug.Log("in start");
         networkService = new NetworkService();
         userDataManager = new UserDataManager();
         userDataManager.OnUserDataUpdated += UpdateUI;
