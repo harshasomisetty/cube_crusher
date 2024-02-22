@@ -18,18 +18,19 @@ public class CharacterSelectionManager : MonoBehaviour
     public GameObject[] characters;
     public Image highlightBorder;
     public Material disabledMaterial;
+    public GameObject Menu;
 
     List<int> unlockedCharacters = new List<int>(3);
 
     private const string HasFetchedKey = "HasFetchedCharacters";
     private const string UnlockedCharactersKey = "UnlockedCharacters";
 
-
     public void SelectCharacter(int characterIndex)
     {
         if (!unlockedCharacters.Contains(characterIndex))
         {
             Debug.Log("Character " + characterIndex + " is locked.");
+            Menu.SetActive(true);
             return;
         }
 
@@ -46,15 +47,6 @@ public class CharacterSelectionManager : MonoBehaviour
             GameObject character = characters[i];
             if (!unlockedCharacters.Contains(i))
             {
-                // Disable the button or selection component here if necessary
-                // For example, if your characters have a Button component attached
-                // Button buttonComponent = character.GetComponent<Button>();
-                // if (buttonComponent != null)
-                // {
-                //     buttonComponent.interactable = false;
-                // }
-
-                // Apply the disabled material
                 Image imageComponent = character.GetComponent<Image>();
                 if (imageComponent != null)
                 {
@@ -149,5 +141,9 @@ public class CharacterSelectionManager : MonoBehaviour
         }
     }
 
+    public void CloseBuyMenu()
+    {
+        Menu.SetActive(false);
+    }
 
 }
