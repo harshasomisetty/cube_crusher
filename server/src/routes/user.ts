@@ -8,6 +8,7 @@ import {
   checkUserExists,
   getUserAssets,
   getUserCharacters,
+  getUserInventory,
   getUserProfileNFT,
   updateAsset,
 } from '../services/user.service';
@@ -57,24 +58,23 @@ router.get('/:email/profile', async (req, res) => {
   }
 });
 
-router.get('/:email/gamesPlayed', async (req, res) => {
+router.get('/:email/inventory', async (req, res) => {
   const email = req.params.email;
   const refId = email.split('@')[0];
 
   try {
     await checkUserExists(refId, email);
-    const profileNFT = await getUserProfileNFT(refId);
+
+    const inventory = await getUserInventory(refId);
     res.json({
-      email: email,
-      gamesPlayed: profileNFT.attributes.find(
-        (attr) => attr.traitType === 'Games Played',
-      ).value,
+      inventory,
     });
   } catch (error) {
-    console.error('Error fetching Games Played', error.message);
-    const statusCode = error.message === 'Profile NFT not found' ? 404 : 500;
+    console.error('Error fetching inventory:', error.message);
+    const statusCode = error.message === 'Inventory not found' ? 404 : 500;
     res.status(statusCode).send({
-      message: error.message || 'An error occurred while fetching the profile',
+      message:
+        error.message || 'An error occurred while fetching the inventory',
     });
   }
 });
@@ -97,6 +97,27 @@ router.get('/:email/characters', async (req, res) => {
   }
 });
 
+router.get('/:email/gamesPlayed', async (req, res) => {
+  const email = req.params.email;
+  const refId = email.split('@')[0];
+
+  try {
+    await checkUserExists(refId, email);
+    const profileNFT = await getUserProfileNFT(refId);
+    res.json({
+      email: email,
+      gamesPlayed: profileNFT.attributes.find(
+        (attr) => attr.traitType === 'Games Played',
+      ).value,
+    });
+  } catch (error) {
+    console.error('Error fetching Games Played', error.message);
+    const statusCode = error.message === 'Profile NFT not found' ? 404 : 500;
+    res.status(statusCode).send({
+      message: error.message || 'An error occurred while fetching the profile',
+    });
+  }
+});
 // Finished game on client, updating profile NFT with games played
 router.put('/:email/finishGame', async (req, res) => {
   const email = req.params.email;

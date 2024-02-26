@@ -102,7 +102,6 @@ namespace Data
             using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
             {
                 yield return webRequest.SendWebRequest();
-                Debug.Log("webRequest.downloadHandler.text" + webRequest.downloadHandler.text);
 
                 if (webRequest.result == UnityWebRequest.Result.ConnectionError || webRequest.result == UnityWebRequest.Result.ProtocolError)
                 {
@@ -114,5 +113,25 @@ namespace Data
                 }
             }
         }
+
+        public IEnumerator GetUserInventory(string email, Action<string> onSuccess, Action<string> onError)
+        {
+            string url = AppConfig.SERVER_ENDPOINT + "/user/" + email + "/inventory";
+
+            using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
+            {
+                yield return webRequest.SendWebRequest();
+
+                if (webRequest.result == UnityWebRequest.Result.ConnectionError || webRequest.result == UnityWebRequest.Result.ProtocolError)
+                {
+                    onError?.Invoke(webRequest.error);
+                }
+                else
+                {
+                    onSuccess?.Invoke(webRequest.downloadHandler.text);
+                }
+            }
+        }
+
     }
 }

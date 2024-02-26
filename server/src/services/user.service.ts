@@ -5,6 +5,9 @@ const axios = require('axios');
 const apiKey = process.env.GAMESHIFT_KEY;
 const apiRoot = process.env.GAMESHIFT_ROOT;
 const profileTemplate = process.env.PROFILE_TEMPLATE;
+const whiteTemplate = process.env.WHITE_TEMPLATE;
+const redTemplate = process.env.RED_TEMPLATE;
+const blueTemplate = process.env.BLUE_TEMPLATE;
 
 const headers = {
   accept: 'application/json',
@@ -31,12 +34,22 @@ export const createUser = async (refId, email) => {
   );
 };
 
-export const postAssetTemplate = async (refId, profileTemplate) => {
+export const postAssetTemplate = async (refId, templateId) => {
   return await axios.post(
-    `${apiRoot}/asset-templates/${profileTemplate}/assets`,
+    `${apiRoot}/asset-templates/${templateId}/assets`,
     { destinationUserReferenceId: refId },
     { headers },
   );
+};
+
+export const checkUserExists = async (refId, email) => {
+  let response = await getUserByRefId(refId);
+
+  if (response.status === 404) {
+    await createUser(refId, email);
+    await postAssetTemplate(refId, profileTemplate);
+    await postAssetTemplate(refId, whiteTemplate);
+  }
 };
 
 export const getUserAssets = async (refId) => {
@@ -58,13 +71,26 @@ export const getUserCharacters = async (refId) => {
   return colors;
 };
 
-export const checkUserExists = async (refId, email) => {
-  let response = await getUserByRefId(refId);
+export const getUserInventory = async (refId) => {
+  let assetsResponse = await getUserAssets(refId);
 
-  if (response.status === 404) {
-    await createUser(refId, email);
-    await postAssetTemplate(refId, profileTemplate);
-  }
+  const inventoryItems = assetsResponse.data.data
+    .filter(
+      (asset) => asset.name !== 'Profile' && !asset.name.endsWith('character'),
+    )
+    .map((asset) => ({
+      name: asset.name,
+      description: asset.description,
+      created: asset.created,
+      attributes: asset.attributes,
+      // environment: asset.environment,
+      imageUrl: asset.imageUrl,
+      mintAddress: asset.mintAddress,
+      owner: asset.owner,
+      priceCents: asset.priceCents,
+    }));
+
+  return inventoryItems;
 };
 
 export const getUserProfileNFT = async (refId) => {

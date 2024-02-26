@@ -86,6 +86,7 @@ public class CharacterSelectionManager : MonoBehaviour
 
     void Start()
     {
+        networkService = new NetworkService();
         LoadUnlockedCharacters();
 
         bool hasFetched = PlayerPrefs.GetInt(HasFetchedKey, 0) == 1;
@@ -106,7 +107,6 @@ public class CharacterSelectionManager : MonoBehaviour
         string userEmail = PlayerPrefs.GetString("UserEmail", "");
         if (!string.IsNullOrEmpty(userEmail))
         {
-            networkService = new NetworkService();
 
             StartCoroutine(networkService.GetUserCharacters(userEmail, onGetCharactersSuccess, error =>
             {
@@ -141,9 +141,5 @@ public class CharacterSelectionManager : MonoBehaviour
         }
     }
 
-    public void CloseBuyMenu()
-    {
-        Menu.SetActive(false);
-    }
 
 }
