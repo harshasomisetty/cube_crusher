@@ -10,6 +10,7 @@ import {
   getUserCharacters,
   getUserInventory,
   getUserProfileNFT,
+  transferAsset,
   updateAsset,
 } from '../services/user.service';
 
@@ -17,7 +18,6 @@ router.get('/', function (req, res, next) {
   res.status(200).send('user endpoint');
 });
 
-// Fetch all user assets
 router.get('/:email', async (req, res) => {
   const email = req.params.email;
   const refId = email.split('@')[0];
@@ -37,7 +37,6 @@ router.get('/:email', async (req, res) => {
   }
 });
 
-// get user profile NFT
 router.get('/:email/profile', async (req, res) => {
   const email = req.params.email;
   const refId = email.split('@')[0];
@@ -118,6 +117,7 @@ router.get('/:email/gamesPlayed', async (req, res) => {
     });
   }
 });
+
 // Finished game on client, updating profile NFT with games played
 router.put('/:email/finishGame', async (req, res) => {
   const email = req.params.email;
@@ -164,6 +164,30 @@ router.post('/:email/award', async (req, res) => {
     });
   } catch (error) {
     console.error('Error in /award route:', error.message);
+    res.status(error.response?.status || 500).send({ message: error.message });
+  }
+});
+
+router.post('/:email/transferAsset', async (req, res) => {
+  const email = req.params.email;
+  const refId = email.split('@')[0];
+
+  const { assetId, destinationUserId, destinationWallet } = req.body;
+
+  if (!assetId || (!destinationUserId && !destinationWallet)) {
+    return res.status(400).send({ message: 'Missing required parameters' });
+  }
+
+  try {
+    const destination = destinationUserId
+      ? { destinationUserId }
+      : { destinationWallet };
+
+    const result = await transferAsset(assetId, refId, destination);
+
+    res.json({ transferUrl: result.data });
+  } catch (error) {
+    console.error('Error in /transferAsset route:', error.message);
     res.status(error.response?.status || 500).send({ message: error.message });
   }
 });

@@ -73,12 +73,14 @@ export const getUserCharacters = async (refId) => {
 
 export const getUserInventory = async (refId) => {
   let assetsResponse = await getUserAssets(refId);
+  // console.log('assets', assetsResponse.data.data);
 
   const inventoryItems = assetsResponse.data.data
     .filter(
       (asset) => asset.name !== 'Profile' && !asset.name.endsWith('character'),
     )
     .map((asset) => ({
+      id: asset.id,
       name: asset.name,
       description: asset.description,
       created: asset.created,
@@ -138,4 +140,34 @@ export const awardToUser = async (refId) => {
     console.error('Error posting award to Gameshift:', error.message);
     throw error;
   }
+};
+
+type Destination = {
+  destinationUserId?: string;
+  destinationWallet?: string;
+};
+
+export const transferAsset = async (
+  assetId: string,
+  userId: string,
+  destination: Destination,
+) => {
+  if (!destination.destinationUserId && !destination.destinationWallet) {
+    throw new Error(
+      'Either destinationUserId or destinationWallet must be provided.',
+    );
+  }
+
+  const destinationKey = destination.destinationUserId
+    ? { destinationUserReferenceId: destination.destinationUserId }
+    : { destinationWallet: destination.destinationWallet };
+
+  return await axios.post(
+    `${apiRoot}/assets/${assetId}/transfer`,
+    {
+      onBehalfOf: userId,
+      ...destinationKey,
+    },
+    { headers },
+  );
 };
