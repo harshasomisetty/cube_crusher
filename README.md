@@ -7,7 +7,7 @@ This document provides guidelines on integrating GameShift, into your Unity game
 
 When integrating GameShift into your Unity game, we recommend the following architecture:
 
-![image](https://github.com/harshasomisetty/cube_crusher/assets/25572511/f6640649-be46-41ad-9759-032c3e3ca5c8)
+![image](https://github.com/harshasomisetty/cube_crusher/assets/25572511/8890f8f0-837b-4787-8bf6-5bf7e72529ea)
 
 
 - **Game Client:** A Unity application that the player interacts with. It is responsible for presenting the game state and handling user inputs.
@@ -25,6 +25,69 @@ The interaction between the Game Client, Server, and GameShift API typically fol
 
 1. **Action Sending:** The Game Client sends player actions to the Server. [code](https://github.com/harshasomisetty/cube_crusher/blob/438d3047d4b86a3a4c5ec958b642a0490cbef2c4/3dgame/Assets/Scripts/Data/NetworkService.cs#L49)
 
+
+```
+    public IEnumerator AwardUser(string userEmail, Action<string> onSuccess, Action<string> onError)
+        {
+            string url = AppConfig.SERVER_ENDPOINT + "/user/" + userEmail + "/award";
+
+            using (UnityWebRequest webRequest = new UnityWebRequest(url, "POST"))
+            {
+                webRequest.downloadHandler = new DownloadHandlerBuffer();
+                webRequest.uploadHandler = new UploadHandlerRaw(new byte[0]);
+                webRequest.SetRequestHeader("Content-Type", "application/json");
+
+                yield return webRequest.SendWebRequest();
+
+                if (webRequest.result == UnityWebRequest.Result.ConnectionError || webRequest.result == UnityWebRequest.Result.ProtocolError)
+                {
+                    onError?.Invoke(webRequest.error);
+                }
+                else
+                {
+                    onSuccess?.Invoke(webRequest.downloadHandler.text);
+                }
+            }
+        }
+```
+
+
 2. **Data Processing:** The Server processes these actions and sends relevant requests to the GameShift API, and receives an appropriate response. [code](https://github.com/harshasomisetty/cube_crusher/blob/438d3047d4b86a3a4c5ec958b642a0490cbef2c4/server/src/routes/user.ts#L156)
 
-3. **State Update:** The Server updates the game state and sends it back to the Game Client. [code](https://github.com/harshasomisetty/cube_crusher/blob/438d3047d4b86a3a4c5ec958b642a0490cbef2c4/3dgame/Assets/Scripts/Menus/EndMenu.cs#L65)
+
+```
+    router.post('/:email/award', async (req, res) => {
+      const email = req.params.email;
+      const refId = email.split('@')[0];
+    
+      try {
+        const result = await awardToUser(refId);
+        res.json({
+          ...result,
+        });
+      } catch (error) {
+        console.error('Error in /award route:', error.message);
+        res.status(error.response?.status || 500).send({ message: error.message });
+      }
+    });
+```
+
+3. **State Update:** The Server updates the game state and sends it back to the Game Client. [code](https://github.com/harshasomisetty/cube_crusher/blob/438d3047d4b86a3a4c5ec958b642a0490cbef2c4/3dgame/Assets/Scripts/Menus/EndMenu.cs#L81)
+
+```
+    public void OnAwardUserSuccess(string json)
+    {
+        var awardData = JsonUtility.FromJson<AwardJson>(json);
+        if (awardImage == null)
+        {
+            Debug.LogError("awardImage is not assigned in the inspector.");
+            return;
+        }
+        redeemUI.SetActive(false);
+        awardUI.SetActive(true);
+        StartCoroutine(networkService.DownloadImage(awardData.imageUrl, awardImage));
+    
+    
+        Debug.Log("User awarded successfully");
+    }
+```
