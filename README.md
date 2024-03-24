@@ -19,6 +19,17 @@ When integrating GameShift into your Unity game, we recommend the following arch
 
 The server plays a major role in this architecture by processing game logic, securely interacting with the GameShift API, and updating the game state based on the responses.
 
+## Setup
+
+Once you setup the server environment variables, you need to setup appropriate templates to represent game user profiles & character configs. From the server folder, run
+
+```
+sh ./scripts/template_setup.sh
+```
+
+This should setup the templates in your Gameshift Game. You can now copy the template IDs from the Gameshift template collectible browser as env variables to your server.
+
+
 ## Workflow
 
 The interaction between the Game Client, Server, and GameShift API typically follows these steps. We've included sample code to demonstrate a potential integration—the github repo is available [here](https://github.com/harshasomisetty/cube_crusher/tree/main), we will follow sample code to show how a player might be awarded an nft after clearing a level
